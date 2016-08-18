@@ -10,7 +10,7 @@ from datetime import datetime
 
 from flask import Response
 
-from presence_analyzer.main import app
+from main import app
 
 import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -94,6 +94,7 @@ def interval(start, end):
     """
     Calculates inverval in seconds between two datetime.time objects.
     """
+
     return seconds_since_midnight(end) - seconds_since_midnight(start)
 
 
