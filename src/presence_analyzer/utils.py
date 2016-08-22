@@ -2,8 +2,9 @@
 """
 Helper functions used in views.
 """
-
+import calendar
 import csv
+
 from json import dumps
 from functools import wraps
 from datetime import datetime
@@ -35,7 +36,6 @@ def jsonify(function):
 def get_data():
     """
     Extracts presence data from CSV file and groups it by user_id.
-
     It creates structure like this:
     data = {
         'user_id': {
@@ -94,7 +94,6 @@ def interval(start, end):
     """
     Calculates inverval in seconds between two datetime.time objects.
     """
-
     return seconds_since_midnight(end) - seconds_since_midnight(start)
 
 
@@ -103,3 +102,25 @@ def mean(items):
     Calculates arithmetic mean. Returns zero for empty lists.
     """
     return float(sum(items)) / len(items) if len(items) > 0 else 0
+
+
+def day_start_end(items):
+    """
+    Groups times of start and end work at weekday.
+    """
+    list_pre = [[] for i in xrange(7)]
+    for date in items:
+        start = seconds_since_midnight(items[date]['start'])
+        end = seconds_since_midnight(items[date]['end'])
+        list_pre[date.weekday()].append([start, end])
+    days = calendar.day_abbr
+    result = []
+    for day in days:
+        start = []
+        end = []
+        for item in list_pre[len(result)]:
+            if item != []:
+                start.append(item[0])
+                end.append(item[1])
+        result.append([day, mean(start), mean(end)])
+    return result
