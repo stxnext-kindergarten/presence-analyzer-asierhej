@@ -7,7 +7,7 @@
     <meta name="description" content=""/>
     <meta name="author" content="STX Next sp. z o.o."/>
     <meta name="viewport" content="width=device-width; initial-scale=1.0">
-    
+
     <link href="/static/css/normalize.css" media="all" rel="stylesheet" type="text/css" />
     <style type="text/css">
         body {
@@ -23,7 +23,7 @@
             padding: 0 2em;
             border: 1px solid #AAA;
             background-color: #FFF;
-            
+
             border: 1px solid black;
             clear: both;
             padding: 0 1em;
@@ -38,14 +38,14 @@
             padding: 0;
             margin: 0;
         }
-        
+
         #header li {
             float: left;
             border: 1px solid #bbb;
             border-bottom-width: 0;
             margin: 0;
         }
-        
+
         #header a {
             text-decoration: none;
             display: block;
@@ -55,15 +55,15 @@
             width: 12em;
             text-align: center;
         }
-        
+
         #header a:hover {
             background: #ddf;
         }
-        
+
         #header #selected {
             border-color: black;
         }
-        
+
         #header #selected a {
             position: relative;
             top: 1px;
@@ -77,7 +77,6 @@
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
         google.load("visualization", "1", {packages:["corechart"], 'language': 'en'});
-
         (function($) {
             $(document).ready(function(){
                 var loading = $('#loading');
@@ -96,8 +95,8 @@
                         loading.show();
                         chart_div.hide();
                         $.getJSON("/api/v1/presence_weekday/"+selected_user, function(result) {
-                            var data = google.visualization.arrayToDataTable(result);
-                            var options = {};
+                            var data = google.visualization.arrayToDataTable(result),
+                            options = {};
                             chart_div.show();
                             loading.hide();
                             var chart = new google.visualization.PieChart(chart_div[0]);
@@ -114,10 +113,11 @@
     <div id="main">
         <div id="header">
             <h1>Presence analyzer</h1>
-            
+
             <ul>
                 <li id="selected"><a href="/static/presence_weekday.html">Presence by weekday</a></li>
                 <li><a href="/static/mean_time_weekday.html">Presence mean time</a></li>
+                <li><a href="/static/presence_start_end.html">Presence start-end</a></li>
             </ul>
         </div>
         <div id="content">

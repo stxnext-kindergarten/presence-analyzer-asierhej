@@ -87,22 +87,42 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         """
         Test of mean presence time grouped by weekday of given user.
         """
-        resp = self.client.get('/api/v1/presence_weekday/11')
+        resp = self.client.get('/api/v1/mean_time_weekday/11')
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
         self.assertEqual(
             data,
-            ([
-                ['Weekday', 'Presence (s)'],
-                ['Mon', 24123],
-                ['Tue', 16564],
-                ['Wed', 25321],
-                ['Thu', 45968],
-                ['Fri', 6426],
-                ['Sat', 0],
-                ['Sun', 0]
-            ])
+            [
+                ['Mon', 24123.0],
+                ['Tue', 16564.0],
+                ['Wed', 25321.0],
+                ['Thu', 22984.0],
+                ['Fri', 6426.0],
+                ['Sat', 0.0],
+                ['Sun', 0.0]
+            ]
+        )
+
+    def test_presence_start_end(self):
+        """
+        Test the medium time to come to the office and medium time of leave.
+        """
+        resp = self.client.get('/api/v1/presence_start_end/10')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(
+            data,
+            [
+                ['Mon', 0, 0],
+                ['Tue', 34745.0, 64792.0],
+                ['Wed', 33592.0, 58057.0],
+                ['Thu', 38926.0, 62631.0],
+                ['Fri', 0, 0],
+                ['Sat', 0, 0],
+                ['Sun', 0, 0]
+            ]
         )
 
 
@@ -168,6 +188,25 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         self.assertEqual(58.75, data)
         data = utils.mean([])
         self.assertEqual(0, data)
+
+    def test_day_start_end(self):
+        """
+        Test start and end work times sorted by weekday.
+
+        """
+        user = utils.get_data()
+        data = utils.day_start_end(user[10])
+        self.assertEqual(
+            data,
+            [
+                ['Mon', 0, 0],
+                ['Tue', 34745.0, 64792.0],
+                ['Wed', 33592.0, 58057.0],
+                ['Thu', 38926.0, 62631.0],
+                ['Fri', 0, 0],
+                ['Sat', 0, 0],
+                ['Sun', 0, 0]
+            ])
 
 
 def suite():
