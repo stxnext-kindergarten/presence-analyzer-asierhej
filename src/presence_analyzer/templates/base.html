@@ -1,4 +1,9 @@
 <!doctype html>
+{% set navigate = [
+    (url_for('redirect',where = 'presence_weekday'),'Presence by weekday','main'),
+    (url_for('redirect', where = 'mean_time_weekday'),'Presence mean time','mean'),
+    (url_for('redirect', where = 'presence_start_end'),'Presence start-end','startend')
+] %}
 <html lang=en>
 <head>
     <meta charset=utf-8>
@@ -7,7 +12,6 @@
     <meta name="description" content=""/>
     <meta name="author" content="STX Next sp. z o.o."/>
     <meta name="viewport" content="width=device-width; initial-scale=1.0">
-
     <link href="/static/css/normalize.css" media="all" rel="stylesheet" type="text/css" />
     <style type="text/css">
         body {
@@ -72,52 +76,16 @@
             font-weight: bold;
         }
     </style>
-
-    <script src="/static/js/jquery.min.js"></script>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-        google.load("visualization", "1", {packages:["corechart"], 'language': 'en'});
-        (function($) {
-            $(document).ready(function(){
-                var loading = $('#loading');
-                $.getJSON("/api/v1/users", function(result) {
-                    var dropdown = $("#user_id");
-                    $.each(result, function(item) {
-                        dropdown.append($("<option />").val(this.user_id).text(this.name));
-                    });
-                    dropdown.show();
-                    loading.hide();
-                });
-                $('#user_id').change(function(){
-                    var selected_user = $("#user_id").val();
-                    var chart_div = $('#chart_div');
-                    if(selected_user) {
-                        loading.show();
-                        chart_div.hide();
-                        $.getJSON("/api/v1/presence_weekday/"+selected_user, function(result) {
-                            var data = google.visualization.arrayToDataTable(result),
-                            options = {};
-                            chart_div.show();
-                            loading.hide();
-                            var chart = new google.visualization.PieChart(chart_div[0]);
-                            chart.draw(data, options);
-                        });
-                    }
-                });
-            });
-        })(jQuery);
-    </script>
 </head>
-
+{% block scripts %}{% endblock %}
 <body>
     <div id="main">
         <div id="header">
             <h1>Presence analyzer</h1>
-
             <ul>
-                <li id="selected"><a href="/static/presence_weekday.html">Presence by weekday</a></li>
-                <li><a href="/static/mean_time_weekday.html">Presence mean time</a></li>
-                <li><a href="/static/presence_start_end.html">Presence start-end</a></li>
+                {% for href, name, there in navigate %}
+                <li{% if here == there %} id = "selected"{% endif %}><a href="{{ href }}">{{ name }}</a></li>
+                {% endfor %}
             </ul>
         </div>
         <div id="content">
@@ -133,7 +101,6 @@
                 </div>
             </p>
         </div>
-
     </div>
 </body>
 </html>

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% set here = 'startend' %}
+{% block scripts %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/parseInterval.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart", "timeline"], 'language': 'pl'});
+    </script>
+    <script>
+        parseInterval();
+    </script>
+    <script type="text/javascript">
+    
+        (function($) {
+            $(document).ready(function(){
+                var loading = $('#loading');
+                $.getJSON('{{ url_for("users_view")}}', function(result) {
+                    var dropdown = $("#user_id");
+                    $.each(result, function(item) {
+                        dropdown.append($("<option />").val(this.user_id).text(this.name));
+                    });
+                    dropdown.show();
+                    loading.hide();
+                });
+                $('#user_id').change(function(){
+                    var selected_user = $("#user_id").val(),
+                    chart_div = $('#chart_div');
+                    if(selected_user) {
+                        loading.show();
+                        chart_div.hide();
+                        var selected_user_int = parseInt(selected_user); 
+                        $.getJSON('{{ url_for("presence_start_end", user_id=0) }}'+selected_user_int, function(result) {
+                            $.each(result, function(index, value) {
+                                value[1] = parseInterval(value[1]);
+                                value[2] = parseInterval(value[2]);
+                            });
+                            var data = new google.visualization.DataTable();
+                            data.addColumn('string', 'Weekday');
+                            data.addColumn({ type: 'datetime', id: 'Start' });
+                            data.addColumn({ type: 'datetime', id: 'End' });
+                            data.addRows(result);
+                            var options = {
+                                hAxis: {title: 'Weekday'},
+                            },
+                                formatter = new google.visualization.DateFormat({pattern: 'HH:mm:ss'});
+                            formatter.format(data, 1);
+                            formatter.format(data, 2);
+                            chart_div.show();
+                            loading.hide();
+                            var chart = new google.visualization.Timeline(chart_div[0]);
+                            chart.draw(data, options);
+                        });
+                    }
+                });
+            });
+        })(jQuery);
+    </script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% set here = 'main' %}
+{% block scripts %}
+    <script src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart"], 'language': 'en'});
+        (function($) {
+            $(document).ready(function(){
+                var loading = $('#loading');
+                $.getJSON('{{ url_for("users_view")}}', function(result) {
+                    var dropdown = $("#user_id");
+                    $.each(result, function(item) {
+                        dropdown.append($("<option />").val(this.user_id).text(this.name));
+                    });
+                    dropdown.show();
+                    loading.hide();
+                });
+                $('#user_id').change(function(){
+                    var selected_user = $("#user_id").val(),
+                    chart_div = $('#chart_div');
+                    if(selected_user) {
+                        loading.show();
+                        chart_div.hide();
+                        var selected_user_int = parseInt(selected_user); 
+                        $.getJSON('{{ url_for("presence_weekday_view", user_id=0) }}'+selected_user_int, function(result) {
+                            var data = google.visualization.arrayToDataTable(result),
+                            options = {};
+                            chart_div.show();
+                            loading.hide();
+                            var chart = new google.visualization.PieChart(chart_div[0]);
+                            chart.draw(data, options);
+                        });
+                    }
+                });
+            });
+        })(jQuery);
+    </script>
+{% endblock %}
