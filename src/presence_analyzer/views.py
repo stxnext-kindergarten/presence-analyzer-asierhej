@@ -4,7 +4,8 @@ Defines views.
 """
 import calendar
 
-from flask import redirect, abort
+from flask import abort, render_template
+from jinja2 import TemplateNotFound
 
 from main import app
 from utils import day_start_end, get_data, group_by_weekday, jsonify, mean
@@ -14,12 +15,16 @@ import logging
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
-@app.route('/')
-def mainpage():
+@app.route('/', defaults={'where': 'presence_weekday'})
+@app.route('/<where>')
+def redirect(where):
     """
-    Redirects to front page.
+    Redirects to pages.
     """
-    return redirect('/static/presence_weekday.html')
+    try:
+        return render_template('%s.html' % where)
+    except TemplateNotFound:
+        abort(404)
 
 
 @app.route('/api/v1/users', methods=['GET'])
