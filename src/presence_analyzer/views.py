@@ -3,28 +3,35 @@
 Defines views.
 """
 import calendar
-
-from flask import abort, render_template
-from jinja2 import TemplateNotFound
-
-from main import app
-from utils import day_start_end, get_data, group_by_weekday, jsonify, mean
-
-
 import logging
+
+from flask import abort
+# pylint: disable=import-error
+from flask_mako import MakoTemplates, render_template
+
+from presence_analyzer.main import app
+from presence_analyzer.utils import (
+    day_start_end,
+    get_data,
+    group_by_weekday,
+    jsonify,
+    mean
+)
+
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+mako = MakoTemplates(app)  # pylint: disable=invalid-name
 
 
-@app.route('/', defaults={'where': 'presence_weekday'})
+@app.route('/', defaults={'where': 'presence_weekday.html'})
 @app.route('/<where>')
-def redirect(where):
+def redirect_mako(where):
     """
     Redirects to pages.
     """
     try:
-        return render_template('%s.html' % where)
-    except TemplateNotFound:
-        abort(404)
+        return render_template(where, name=mako)
+    except:
+        return render_template('not_found.html', name=mako)
 
 
 @app.route('/api/v1/users', methods=['GET'])

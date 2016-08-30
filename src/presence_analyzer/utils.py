@@ -4,6 +4,7 @@ Helper functions used in views.
 """
 import calendar
 import csv
+import logging
 
 from json import dumps
 from functools import wraps
@@ -11,9 +12,9 @@ from datetime import datetime
 
 from flask import Response
 
-from main import app
+from presence_analyzer.main import app
 
-import logging
+
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
 
 
@@ -108,17 +109,17 @@ def day_start_end(items):
     """
     Groups times of start and end work at weekday.
     """
-    list_pre = [[] for i in xrange(7)]
+    weekdays = [[] for day in xrange(7)]
     for date in items:
         start = seconds_since_midnight(items[date]['start'])
         end = seconds_since_midnight(items[date]['end'])
-        list_pre[date.weekday()].append([start, end])
+        weekdays[date.weekday()].append([start, end])
     days = calendar.day_abbr
     result = []
     for day in days:
         start = []
         end = []
-        for item in list_pre[len(result)]:
+        for item in weekdays[len(result)]:
             if item != []:
                 start.append(item[0])
                 end.append(item[1])
