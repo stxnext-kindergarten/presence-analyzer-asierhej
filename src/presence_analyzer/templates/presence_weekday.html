@@ -1,14 +1,17 @@
-{% extends "base.html" %}
-{% set here = 'main' %}
-{% block scripts %}
+<%inherit file="base.html"/>
+<%def name="location()">
+    <% return ("main") %>
+</%def>
+<%block name="scripts">
     <script src="/static/js/jquery.min.js"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
     <script type="text/javascript">
         google.load("visualization", "1", {packages:["corechart"], 'language': 'en'});
+
         (function($) {
             $(document).ready(function(){
                 var loading = $('#loading');
-                $.getJSON('{{ url_for("users_view")}}', function(result) {
+                $.getJSON('${url_for("users_view")}', function(result) {
                     var dropdown = $("#user_id");
                     $.each(result, function(item) {
                         dropdown.append($("<option />").val(this.user_id).text(this.name));
@@ -23,7 +26,7 @@
                         loading.show();
                         chart_div.hide();
                         var selected_user_int = parseInt(selected_user); 
-                        $.getJSON('{{ url_for("presence_weekday_view", user_id=0) }}'+selected_user_int, function(result) {
+                        $.getJSON("${url_for('presence_weekday_view', user_id=0)}"+selected_user_int, function(result) {
                             var data = google.visualization.arrayToDataTable(result),
                             options = {};
                             chart_div.show();
@@ -36,4 +39,4 @@
             });
         })(jQuery);
     </script>
-{% endblock %}
+</%block>

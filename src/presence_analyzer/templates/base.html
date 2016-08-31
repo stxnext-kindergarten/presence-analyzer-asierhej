@@ -1,9 +1,10 @@
 <!doctype html>
-{% set navigate = [
-    (url_for('redirect',where = 'presence_weekday'),'Presence by weekday','main'),
-    (url_for('redirect', where = 'mean_time_weekday'),'Presence mean time','mean'),
-    (url_for('redirect', where = 'presence_start_end'),'Presence start-end','startend')
-] %}
+<% (here) = self.location() %>
+<% navigate = [
+    (url_for('redirect_mako',where = 'presence_weekday.html'),'Presence by weekday','main'),
+    (url_for('redirect_mako', where = 'mean_time_weekday.html'),'Presence mean time','mean'),
+    (url_for('redirect_mako', where = 'presence_start_end.html'),'Presence start-end','startend')
+] %>
 <html lang=en>
 <head>
     <meta charset=utf-8>
@@ -13,79 +14,24 @@
     <meta name="author" content="STX Next sp. z o.o."/>
     <meta name="viewport" content="width=device-width; initial-scale=1.0">
     <link href="/static/css/normalize.css" media="all" rel="stylesheet" type="text/css" />
-    <style type="text/css">
-        body {
-            font-family: latoregular, Helvetica, Arial;
-            background-color: #EEE;
-        }
-        #main {
-            width: 800px;
-            margin: 2em auto;
-            padding: 0 2em;
-        }
-        #content {
-            padding: 0 2em;
-            border: 1px solid #AAA;
-            background-color: #FFF;
-
-            border: 1px solid black;
-            clear: both;
-            padding: 0 1em;
-        }
-        #chart_div {
-            width: 750px;
-            height: 750px;
-        }
-
-        #header ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #header li {
-            float: left;
-            border: 1px solid #bbb;
-            border-bottom-width: 0;
-            margin: 0;
-        }
-
-        #header a {
-            text-decoration: none;
-            display: block;
-            background: #eee;
-            padding: 0.24em 1em;
-            color: #00c;
-            width: 12em;
-            text-align: center;
-        }
-
-        #header a:hover {
-            background: #ddf;
-        }
-
-        #header #selected {
-            border-color: black;
-        }
-
-        #header #selected a {
-            position: relative;
-            top: 1px;
-            background: white;
-            color: black;
-            font-weight: bold;
-        }
-    </style>
+    <link href="/static/css/basiclook.css" media="all" rel="stylesheet" type="text/css" />
 </head>
-{% block scripts %}{% endblock %}
+<%block name="scripts"/>
 <body>
     <div id="main">
         <div id="header">
             <h1>Presence analyzer</h1>
             <ul>
-                {% for href, name, there in navigate %}
-                <li{% if here == there %} id = "selected"{% endif %}><a href="{{ href }}">{{ name }}</a></li>
-                {% endfor %}
+                <%def name="switches()">
+                    % for href, name, there in navigate:
+                        % if there==here:
+                        <li id = "selected"><a href=${href}>${name}</a></li>
+                        %else:
+                        <li><a href=${href}>${name}</a></li>
+                        % endif
+                    % endfor
+                </%def>
+                ${switches()}
             </ul>
         </div>
         <div id="content">
