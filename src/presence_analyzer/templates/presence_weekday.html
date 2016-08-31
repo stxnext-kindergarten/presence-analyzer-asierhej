@@ -14,14 +14,17 @@
                 $.getJSON('${url_for("users_view")}', function(result) {
                     var dropdown = $("#user_id");
                     $.each(result, function(item) {
-                        dropdown.append($("<option />").val(this.user_id).text(this.name));
+                        dropdown.append($("<option />").val([this.user_id,this.avatar]).text(this.name));
                     });
                     dropdown.show();
                     loading.hide();
                 });
                 $('#user_id').change(function(){
                     var selected_user = $("#user_id").val(),
-                    chart_div = $('#chart_div');
+                    chart_div = $('#chart_div'),
+                        selected_user_int = parseInt(selected_user),
+                        selected_avatar = selected_user.replace(String(selected_user_int)+",","");
+                        document.getElementById("user_img").src = selected_avatar;
                     if(selected_user) {
                         loading.show();
                         chart_div.hide();

@@ -8,12 +8,15 @@ import json
 import datetime
 import unittest
 
-import main
-import utils
-import views
+import main  # pylint: disable=relative-import
+import utils  # pylint: disable=relative-import
+import views  # pylint: disable=unused-import, relative-import
 
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
+)
+TEST_XML_DATA = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'export_test.xml'
 )
 
 
@@ -27,7 +30,12 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         """
         Before each test, set up a environment.
         """
-        main.app.config.update({'DATA_CSV': TEST_DATA_CSV})
+        main.app.config.update(
+            {
+                'XML_DATA': TEST_XML_DATA,
+                'DATA_CSV': TEST_DATA_CSV
+            }
+        )
         self.client = main.app.test_client()
 
     def tearDown(self):
@@ -51,13 +59,13 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content_type, 'application/json')
         data = json.loads(resp.data)
-        self.assertEqual(len(data), 2)
         self.assertEqual(
-            data,
-            [
-                {'user_id': 10, 'name': 'User 10'},
-                {'user_id': 11, 'name': 'User 11'}
-            ]
+            data[0],
+            {
+                'user_id': 36,
+                'name': 'Anna W.',
+                'avatar': 'https://intranet.stxnext.pl:443/api/images/users/36'
+            }
         )
 
     def test_presenc_weekday_view(self):
@@ -134,7 +142,12 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         Before each test, set up a environment.
         """
-        main.app.config.update({'DATA_CSV': TEST_DATA_CSV})
+        main.app.config.update(
+            {
+                'XML_DATA': TEST_XML_DATA,
+                'DATA_CSV': TEST_DATA_CSV
+            }
+        )
 
     def tearDown(self):
         """
@@ -206,6 +219,21 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
                 ['Sat', 0, 0],
                 ['Sun', 0, 0]
             ])
+
+    def test_xml_translator(self):
+        """
+        Test user data from XML file extraction.
+        """
+        data = utils.xml_translator()
+        self.assertIsInstance(data, dict)
+        self.assertItemsEqual(data.keys()[:3], [36, 165, 170])
+        self.assertEqual(
+            data.values()[0],
+            {
+                'name': 'Anna W.',
+                'avatar': 'https://intranet.stxnext.pl:443/api/images/users/36'
+            }
+        )
 
 
 def suite():

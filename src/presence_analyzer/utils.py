@@ -5,6 +5,7 @@ Helper functions used in views.
 import calendar
 import csv
 import logging
+import xml.etree.ElementTree as ET
 
 from json import dumps
 from functools import wraps
@@ -69,6 +70,27 @@ def get_data():
 
             data.setdefault(user_id, {})[date] = {'start': start, 'end': end}
 
+    return data
+
+
+def xml_translator():
+    """
+    Extracts user data from XML file.
+    """
+    tree = ET.parse(app.config['XML_DATA'])
+    root = tree.getroot()
+    root_server = root.find('server')
+    protocol = root_server.find('protocol').text
+    host = root_server.find('host').text
+    port = root_server.find('port').text
+    url = protocol + '://' + host + ':' + port
+    root_user = [root.find('users')]
+    data = {}
+    for user in root_user[0].findall('user'):
+        name = user.find('name').text
+        avatar = user.find('avatar').text
+        id_user = user.get('id')
+        data[int(id_user)] = {'name': name, 'avatar': url + avatar}
     return data
 
 

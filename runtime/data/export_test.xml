@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<intranet>
+    <server>
+        <host>intranet.stxnext.pl</host>
+        <port>443</port>
+        <protocol>https</protocol>
+    </server>
+    <users>
+        <user id="141">
+            <avatar>/api/images/users/141</avatar>
+            <name>Adam P.</name>
+        </user>
+        <user id="176">
+            <avatar>/api/images/users/176</avatar>
+            <name>Adrian K.</name>
+        </user>
+        <user id="170">
+            <avatar>/api/images/users/170</avatar>
+            <name>Agata J.</name>
+        </user>
+        <user id="26">
+            <avatar>/api/images/users/26</avatar>
+            <name>Andrzej S.</name>
+        </user>
+        <user id="165">
+            <avatar>/api/images/users/165</avatar>
+            <name>Anna D.</name>
+        </user>
+        <user id="19">
+            <avatar>/api/images/users/19</avatar>
+            <name>Anna K.</name>
+        </user>
+        <user id="36">
+            <avatar>/api/images/users/36</avatar>
+            <name>Anna W.</name>
+        </user>
+        <user id="122">
+            <avatar>/api/images/users/122</avatar>
+            <name>Artur L.</name>
+        </user>
+        <user id="62">
+            <avatar>/api/images/users/62</avatar>
+            <name>Damian G.</name>
+        </user>
+        <user id="68">
+            <avatar>/api/images/users/68</avatar>
+            <name>Damian K.</name>
+        </user>
+        <user id="49">
+            <avatar>/api/images/users/49</avatar>
+            <name>Dariusz Ś.</name>
+        </user>
+        <user id="151">
+            <avatar>/api/images/users/151</avatar>
+            <name>Dawid J.</name>
+        </user>
+    </users>
+</intranet>
