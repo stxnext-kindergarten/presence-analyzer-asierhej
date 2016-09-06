@@ -4,10 +4,15 @@
 
 import os
 import sys
+import urllib2
 from functools import partial
 
 import paste.script.command
 import werkzeug.script
+
+XML_DATA = os.path.join(
+    os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'export.xml'
+)
 
 etc = partial(os.path.join, 'parts', 'etc')
 
@@ -111,3 +116,11 @@ def run():
         _serve('stop', dry_run=dry_run)
 
     werkzeug.script.run()
+
+
+def download_xml():
+    with open(XML_DATA, 'w') as file:
+        url = "http://sargo.bolt.stxnext.pl/users.xml"
+        data = urllib2.urlopen(url)
+        contents = data.read()
+        file.write(contents)

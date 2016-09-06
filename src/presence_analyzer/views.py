@@ -15,7 +15,8 @@ from presence_analyzer.utils import (
     get_data,
     group_by_weekday,
     jsonify,
-    mean
+    mean,
+    xml_translator
 )
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -30,7 +31,7 @@ def redirect_mako(where):
     """
     try:
         return render_template(where, name=mako)
-    except:
+    except Exception:  # pylint: disable=broad-except
         return render_template('not_found.html', name=mako)
 
 
@@ -40,9 +41,9 @@ def users_view():
     """
     Users listing for dropdown.
     """
-    data = get_data()
+    data = xml_translator()
     return [
-        {'user_id': i, 'name': 'User {0}'.format(str(i))}
+        {'user_id': i, 'name': data[i]['name'], 'avatar': data[i]['avatar']}
         for i in data.keys()
     ]
 
