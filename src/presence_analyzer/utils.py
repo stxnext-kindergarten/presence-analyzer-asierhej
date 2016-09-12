@@ -7,19 +7,19 @@ import csv
 import logging
 import time
 import threading
-import xml.etree.ElementTree as ET
-
-from json import dumps
-from functools import wraps
+from collections import OrderedDict
 from datetime import datetime
+from functools import wraps
 
+import xml.etree.ElementTree as ET
+from json import dumps
 from flask import Response
 
 from presence_analyzer.main import app
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
-cache = {}
+storage_cache = {}
 lock = threading.Lock()
 
 
@@ -39,7 +39,7 @@ def jsonify(function):
     return inner
 
 
-def memoize(storage=cache, age_cache=0):
+def memoize(storage=storage_cache, age_cache=0):
     """
     Caching function.
     """
@@ -177,3 +177,100 @@ def day_start_end(items):
                 end.append(item[1])
         result.append([day, mean(start), mean(end)])
     return result
+
+
+def months_sum_dict(year, items, item, user, months):
+    """
+    Append and sum time for every month.
+    """
+    if item.year == year:
+        start = items[user][item]['start']
+        end = items[user][item]['end']
+        months[item.month].append(interval(start, end))
+        months[item.month] = [sum(months[item.month])]
+    else:
+        pass
+    return months
+
+
+def user_validate(months_sum, user):
+    """
+    Check if user exist.
+    """
+    result = []
+    try:
+        xml_translator()[user]
+        if months_sum == []:
+            pass
+        else:
+            result.append({user: months_sum})
+            result = result[0]
+    except:
+        pass
+    return result
+
+
+def group_by_month(items, year):
+    """
+    Groups presence entries by month.
+    """
+    result = []
+    for user in items:
+        months = [[] for month in xrange(13)]
+        for item in items[user]:
+            months_sum = months_sum_dict(year, items, item, user, months)
+        result.append(user_validate(months_sum, user))
+    return result
+
+
+def sorted_months_dict(dict_months):
+    """
+    Sort months dict.
+    """
+    sorted_dict = OrderedDict(
+        sorted(
+            dict_months,
+            key=lambda x: x[1],
+            reverse=True
+        )
+    )
+    return sorted_dict
+
+
+def five_top_user_data(dict_months, sorted_dict):
+    """
+    Collect data and append it to the top 5 user.
+    """
+    id_top = list(sorted_dict.keys())[:5]
+    result = []
+    for item in id_top:
+        if dict(dict_months)[item] == 0 or len(id_top) < 5:
+            return result
+        else:
+            try:
+                result.append(
+                    {
+                        'user_id': item,
+                        'hours': dict(dict_months)[item][0] / 3600,
+                        'name': xml_translator()[item]['name'],
+                        'avatar': xml_translator()[item]['avatar']
+                    }
+                )
+            except:
+                return result
+    return result
+
+
+def five_top_workers(month, year):
+    """
+    Top 5 presence users with information about them.
+    """
+    dict_months = []
+    monthly_grouped = group_by_month(get_data(), year)
+    for user in monthly_grouped:
+        try:
+            dict_months.append((user.items()[0][0], user.items()[0][1][month]))
+        except:
+            pass
+    sorted_dict = sorted_months_dict(dict_months)
+    return five_top_user_data(dict_months, sorted_dict)
