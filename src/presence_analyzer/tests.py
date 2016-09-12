@@ -6,11 +6,14 @@ from __future__ import unicode_literals
 import os.path
 import json
 import datetime
+import time
 import unittest
 
 import main  # pylint: disable=relative-import
 import utils  # pylint: disable=relative-import
 import views  # pylint: disable=unused-import, relative-import
+
+from .utils import memoize
 
 TEST_DATA_CSV = os.path.join(
     os.path.dirname(__file__), '..', '..', 'runtime', 'data', 'test_data.csv'
@@ -234,6 +237,26 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
                 'avatar': 'https://intranet.stxnext.pl:443/api/images/users/36'
             }
         )
+
+    def test_cache(self):
+        """
+        Test data caching.
+        """
+        @memoize(age_cache=20)
+        def short_calculation():
+            data = 2 + 2
+            data = time.time()
+            time.sleep(2)
+            return data
+        self.assertEqual(short_calculation(), short_calculation())
+
+        @memoize(age_cache=1)
+        def other_calculation():
+            data = 2 + 3
+            data = time.time()
+            time.sleep(3)
+            return data
+        self.assertNotEqual(other_calculation(), other_calculation())
 
 
 def suite():

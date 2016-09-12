@@ -5,6 +5,8 @@ Helper functions used in views.
 import calendar
 import csv
 import logging
+import time
+import threading
 import xml.etree.ElementTree as ET
 
 from json import dumps
@@ -17,6 +19,8 @@ from presence_analyzer.main import app
 
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
+cache = {}
+lock = threading.Lock()
 
 
 def jsonify(function):
@@ -35,6 +39,33 @@ def jsonify(function):
     return inner
 
 
+def memoize(storage=cache, age_cache=0):
+    """
+    Caching function.
+    """
+    def _memoize(function):
+        with lock:
+            def __memoize(*args, **kw):
+                key = function.__name__
+                try:
+                    expired = (
+                        age_cache != 0 and
+                        (storage[key]['expire_time'] + age_cache) <
+                        time.time())
+                except KeyError:
+                    expired = True
+                if not expired:
+                    return storage[key]['values']
+                storage[key] = {
+                    'expire_time': time.time(),
+                    'values': function(*args, **kw)
+                }
+                return storage[key]['values']
+            return __memoize
+    return _memoize
+
+
+@memoize(age_cache=600)
 def get_data():
     """
     Extracts presence data from CSV file and groups it by user_id.
@@ -69,7 +100,6 @@ def get_data():
                 log.debug('Problem with line %d: ', i, exc_info=True)
 
             data.setdefault(user_id, {})[date] = {'start': start, 'end': end}
-
     return data
 
 
@@ -106,11 +136,11 @@ def group_by_weekday(items):
     return result
 
 
-def seconds_since_midnight(time):
+def seconds_since_midnight(date):
     """
     Calculates amount of seconds since midnight.
     """
-    return time.hour * 3600 + time.minute * 60 + time.second
+    return date.hour * 3600 + date.minute * 60 + date.second
 
 
 def interval(start, end):
