@@ -84,12 +84,12 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             [
                 ['Weekday', 'Presence (s)'],
                 ['Mon', 24123],
-                ['Tue', 16564],
-                ['Wed', 25321],
+                ['Tue', 41885],
+                ['Wed', 41885],
                 ['Thu', 45968],
-                ['Fri', 6426],
-                ['Sat', 0],
-                ['Sun', 0]
+                ['Fri', 30549],
+                ['Sat', 6426],
+                ['Sun', 22969]
             ]
         )
 
@@ -105,12 +105,12 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             data,
             [
                 ['Mon', 24123.0],
-                ['Tue', 16564.0],
-                ['Wed', 25321.0],
+                ['Tue', 20942.5],
+                ['Wed', 20942.5],
                 ['Thu', 22984.0],
-                ['Fri', 6426.0],
-                ['Sat', 0.0],
-                ['Sun', 0.0]
+                ['Fri', 15274.5],
+                ['Sat', 6426.0],
+                ['Sun', 22969.0]
             ]
         )
 
@@ -132,6 +132,32 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
                 ['Fri', 0, 0],
                 ['Sat', 0, 0],
                 ['Sun', 0, 0]
+            ]
+        )
+
+    def test_podium(self):
+        """
+        Test five best months of work time.
+        """
+        resp = self.client.get('/api/v1/podium/11')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(
+            data,
+            [
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['April', 1],
+                ['July', 4],
+                ['May', 6],
+                ['August', 6],
+                ['June', 7],
+                ['September', 32]
             ]
         )
 
@@ -246,7 +272,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         def short_calculation():
             data = 2 + 2
             data = time.time()
-            time.sleep(2)
+            time.sleep(1)
             return data
         self.assertEqual(short_calculation(), short_calculation())
 
@@ -254,9 +280,59 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         def other_calculation():
             data = 2 + 3
             data = time.time()
-            time.sleep(3)
+            time.sleep(2)
             return data
         self.assertNotEqual(other_calculation(), other_calculation())
+
+    def test_podium_result_structure_builder(self):
+        """
+        Test building result for podium template.
+        """
+        months = [
+            [], [], [], [], [], [], [276890],
+            [655139], [500730], [233576], [], [], []
+        ]
+        data = utils.podium_result_structure_builder(months)
+        self.assertEqual(
+            data,
+            [
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['June', 76],
+                ['July', 181],
+                ['August', 139],
+                ['September', 64],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0]
+            ]
+        )
+
+    def test_podium_data_maker(self):
+        """
+        Test groups presence entries as podium data.
+        """
+        data = utils.podium_data_maker(utils.get_data()[11])
+        self.assertEqual(
+            data,
+            [
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['April', 1],
+                ['July', 4],
+                ['May', 6],
+                ['August', 6],
+                ['June', 7],
+                ['September', 32]
+            ]
+        )
 
 
 def suite():

@@ -3,7 +3,8 @@
 <% navigate = [
     (url_for('redirect_mako',where = 'presence_weekday.html'),'Presence by weekday','main'),
     (url_for('redirect_mako', where = 'mean_time_weekday.html'),'Presence mean time','mean'),
-    (url_for('redirect_mako', where = 'presence_start_end.html'),'Presence start-end','startend')
+    (url_for('redirect_mako', where = 'presence_start_end.html'),'Presence start-end','startend'),
+    (url_for('redirect_mako', where = 'podium.html'),'Top 5 months','podium')
 ] %>
 <html lang=en>
 <head>
@@ -40,14 +41,15 @@
                 <select id="user_id" style="display: none">
                     <option value="">--</option>
                 </select>
-                <div>
-                    <img id="user_img" scr=""></img>
-                </div>
-                <div id="chart_div" style="display: none">
-                </div>
                 <div id="loading">
                     <img src="/static/img/loading.gif" />
                 </div>
+                <div>
+                    <img id="user_img" scr=""></img>
+                </div>
+                <div id="chart_div" style="display: none"></div>
+                <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
             </p>
         </div>
     </div>

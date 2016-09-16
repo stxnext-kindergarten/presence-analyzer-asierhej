@@ -16,7 +16,8 @@ from presence_analyzer.utils import (
     group_by_weekday,
     jsonify,
     mean,
-    xml_translator
+    xml_translator,
+    podium_data_maker
 )
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -100,3 +101,17 @@ def presence_start_end(user_id):
         abort(404)
 
     return day_start_end(data[user_id])
+
+
+@app.route('/api/v1/podium/<int:user_id>', methods=['GET'])
+@jsonify
+def podium(user_id):
+    """
+    Five best months of work time.
+    """
+    data = get_data()
+    if user_id not in data:
+        log.debug('User %s not found!', user_id)
+        abort(404)
+
+    return podium_data_maker(data[user_id])

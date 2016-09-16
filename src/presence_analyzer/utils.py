@@ -177,3 +177,38 @@ def day_start_end(items):
                 end.append(item[1])
         result.append([day, mean(start), mean(end)])
     return result
+
+
+def podium_data_maker(user):
+    """
+    Groups presence entries as podium data.
+    """
+    months = [[] for month in xrange(13)]
+    for item in user:
+        start = user[item]['start']
+        end = user[item]['end']
+        months[item.month].append(interval(start, end))
+        months[item.month] = [sum(months[item.month])]
+    result = podium_result_structure_builder(months)
+    if result.count(["no data", 0]) > 7:
+        return [["no data", 0] for month in xrange(13)]
+    else:
+        return sorted(result, key=lambda time: time[1])
+
+
+def podium_result_structure_builder(months):
+    """
+    Building result for podium template.
+    """
+    result = []
+    for item in months[1:]:
+        try:
+            result.append(
+                [
+                    calendar.month_name[months.index(item)],
+                    item[0] / 3600
+                ]
+            )
+        except:
+            result.append(["no data", 0])
+    return result
