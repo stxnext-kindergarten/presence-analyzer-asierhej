@@ -5,19 +5,19 @@ Defines views.
 import calendar
 import logging
 
-from flask import abort
 # pylint: disable=import-error
 from flask_mako import MakoTemplates, render_template
 
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     day_start_end,
+    five_top_workers,
     get_data,
     group_by_weekday,
     jsonify,
     mean,
-    xml_translator,
-    podium_data_maker
+    podium_data_maker,
+    xml_translator
 )
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -49,6 +49,34 @@ def users_view():
     ]
 
 
+@app.route('/api/v1/months', methods=['GET'])
+@jsonify
+def months_view():
+    """
+    Month list for dropdown.
+    """
+    data = get_data()
+    years = []
+    years_on = []
+    for user in data:
+        year = data[user].items()[0][0].year
+        if year in years_on:
+            pass
+        else:
+            years.append(('year', year))
+            years_on.append(year)
+    years = sorted(years, key=lambda year: year[1])
+    months = []
+    for month in list(enumerate(calendar.month_abbr[1:])):
+        months.append({'number': month[0], 'name': month[1]})
+    result = []
+    for year in years:
+        for month in months:
+            data = dict(month.items() + [year])
+            result.append(data)
+    return result
+
+
 @app.route('/api/v1/mean_time_weekday/<int:user_id>', methods=['GET'])
 @jsonify
 def mean_time_weekday_view(user_id):
@@ -57,8 +85,7 @@ def mean_time_weekday_view(user_id):
     """
     data = get_data()
     if user_id not in data:
-        log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no data'
 
     weekdays = group_by_weekday(data[user_id])
     result = [
@@ -76,8 +103,7 @@ def presence_weekday_view(user_id):
     """
     data = get_data()
     if user_id not in data:
-        log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no data'
 
     weekdays = group_by_weekday(data[user_id])
     result = [
@@ -97,8 +123,7 @@ def presence_start_end(user_id):
     """
     data = get_data()
     if user_id not in data:
-        log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no data'
 
     return day_start_end(data[user_id])
 
@@ -111,7 +136,16 @@ def podium(user_id):
     """
     data = get_data()
     if user_id not in data:
-        log.debug('User %s not found!', user_id)
-        abort(404)
+        return 'no data'
 
     return podium_data_maker(data[user_id])
+
+
+@app.route('/api/v1/five_top/<month_year>', methods=['GET'])
+@jsonify
+def five_top(month_year):
+    """
+    Top 5 workers per months in year.
+    """
+    data = month_year.split(',')
+    return five_top_workers(int(data[0]), int(data[1]))

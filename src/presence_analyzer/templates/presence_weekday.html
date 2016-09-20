@@ -1,6 +1,6 @@
 <%inherit file="base.html"/>
 <%def name="location()">
-    <% return ("main") %>
+    <% return ('Presence by weekday') %>
 </%def>
 <%block name="scripts">
     <script src="/static/js/jquery.min.js"></script>
@@ -10,7 +10,8 @@
 
         (function($) {
             $(document).ready(function(){
-                var loading = $('#loading');
+                var loading = $('#loading'),
+                    no_data = $("#no_data");
                 $.getJSON('${url_for("users_view")}', function(result) {
                     var dropdown = $("#user_id");
                     $.each(result, function(item) {
@@ -30,6 +31,10 @@
                         chart_div.hide();
                         var selected_user_int = parseInt(selected_user); 
                         $.getJSON("${url_for('presence_weekday_view', user_id=0)}"+selected_user_int, function(result) {
+                            if (result == "no data") {
+                                loading.hide();
+                                no_data.show();
+                            }
                             var data = google.visualization.arrayToDataTable(result),
                             options = {};
                             chart_div.show();

@@ -1,0 +1,64 @@
+<%inherit file="base.html"/>
+<%def name="location()">
+    <% return ("Top 5 users")%>
+</%def>
+<%block name="scripts">
+    <script src="/static/js/jquery.min.js"></script>
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                var loading = $("#loading"),
+                    users = $("#users"),
+                    no_data = $("#no_data");
+                $.getJSON("${url_for("months_view")}", function(result) {
+                    var dropdown = $("#user_id"),
+                        year_dropdown = $("#year")
+                    $.each(result, function(item) {
+                        dropdown.append($("<option />").val([this.number,this.year]).text([this.name, this.year]));
+                    });
+                    dropdown.show();
+                    year_dropdown.show();
+                    loading.hide();
+                });
+                $("#user_id").change(function() {
+                    var selected_user = $("#user_id").val(),
+                        selected_user_int = parseInt(selected_user);
+                    if(selected_user) {
+                        loading.show();
+                        var selected_user_int = parseInt(selected_user); 
+                        $.getJSON("${url_for("five_top", month_year=0)}"+selected_user, function(result) {
+                            loading.hide();
+                            var user_display = $("#user_display"),
+                                text = "",
+                                avatar = "",
+                                all_hours = [],
+                                except = result;
+                            function hours_popup(time, popup_num) {}
+                            if (except.length != 5) {
+                                users.hide();
+                                no_data.show();
+                            } else {
+                                no_data.hide();
+                                for (i = 0; i < result.length; i++) {
+                                    text = result[i]["name"],
+                                    avatar = result[i]["avatar"],
+                                    hours = result[i]["hours"],
+                                    all_hours.push(hours),
+                                    document.getElementById("avatar_display"+ i).src = avatar,
+                                    document.getElementById('hours' + i).hoursall = all_hours,
+                                    document.getElementById("user_display" + i).innerHTML = text;
+                                }
+                                users.show();
+                            }
+                        });
+                    }
+                });
+            });
+        })(jQuery);
+        function hours_popup(time, popup_num) {
+            var popup = document.getElementById('popup'+popup_num);
+            document.getElementById('popup' + popup_num).innerHTML = time[popup_num];
+            popup.classList.toggle('show');
+        }
+    </script>
+</%block>

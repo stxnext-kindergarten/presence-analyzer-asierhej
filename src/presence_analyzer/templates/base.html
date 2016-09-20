@@ -1,10 +1,11 @@
 <!doctype html>
 <% (here) = self.location() %>
 <% navigate = [
-    (url_for('redirect_mako',where = 'presence_weekday.html'),'Presence by weekday','main'),
-    (url_for('redirect_mako', where = 'mean_time_weekday.html'),'Presence mean time','mean'),
-    (url_for('redirect_mako', where = 'presence_start_end.html'),'Presence start-end','startend'),
-    (url_for('redirect_mako', where = 'podium.html'),'Top 5 months','podium')
+    (url_for("redirect_mako",where = "presence_weekday.html"),"Presence by weekday"),
+    (url_for("redirect_mako", where = "mean_time_weekday.html"),"Presence mean time"),
+    (url_for("redirect_mako", where = "presence_start_end.html"),"Presence start-end"),
+    (url_for("redirect_mako", where = "top_5.html"),"Top 5 users"),
+    (url_for('redirect_mako', where = 'podium.html'),'Top 5 months')
 ] %>
 <html lang=en>
 <head>
@@ -24,8 +25,8 @@
             <h1>Presence analyzer</h1>
             <ul>
                 <%def name="switches()">
-                    % for href, name, there in navigate:
-                        % if there==here:
+                    % for href, name in navigate:
+                        % if name==here:
                         <li id = "selected"><a href=${href}>${name}</a></li>
                         %else:
                         <li><a href=${href}>${name}</a></li>
@@ -36,20 +37,41 @@
             </ul>
         </div>
         <div id="content">
-            <h2>Presence by weekday</h2>
+            <h2>${here}</h2>
             <p>
                 <select id="user_id" style="display: none">
                     <option value="">--</option>
                 </select>
-                <div id="loading">
-                    <img src="/static/img/loading.gif" />
-                </div>
                 <div>
                     <img id="user_img" scr=""></img>
                 </div>
                 <div id="chart_div" style="display: none"></div>
-                <div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
-
+                <center>
+                    <div id="users" style="display: none">
+                        <%def  name = "top5()">
+                            % for num in range(5):
+                                <a id="hours${num}" hoursall='' onmouseout='hours_popup("",${num})' onmouseover="hours_popup(hoursall, ${num})">
+                                    <center>
+                                        <div class="popup">
+                                            <span class="popuptext" id="popup${num}"></span>
+                                        </div>
+                                    </center>
+                                <img id="avatar_display${num}" src=></img>
+                                </a>
+                                <div id="user_display${num}" value = ""></div>
+                            % endfor
+                        </%def >
+                        ${top5()}
+                    </div>
+                </center>
+                <div id='no_data' style="display: none">
+                    <p>No data.</p>
+                </div>
+                <div id="loading">
+                    <img src="/static/img/loading.gif" />
+                </div>
+                <div id="chart_div" style="display: none"></div>
+                <div id="container" style="display: none"></div>
             </p>
         </div>
     </div>

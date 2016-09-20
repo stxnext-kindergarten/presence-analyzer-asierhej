@@ -21,6 +21,12 @@
             height: 750px;
         }
 
+        #container {
+            min-width: 310px;
+            height: 400px;
+            margin: 0 auto;
+        }
+
         #header ul {
             list-style: none;
             padding: 0;
@@ -29,6 +35,7 @@
 
         #header li {
             float: left;
+            height: 50px;
             border: 1px solid #bbb;
             border-bottom-width: 0;
             margin: 0;
@@ -40,12 +47,13 @@
             background: #eee;
             padding: 0.24em 1em;
             color: #00c;
-            width: 166px;
+            width: 126px;
             text-align: center;
         }
 
         #header a:hover {
             background: #ddf;
+            height: 42px;
         }
 
         #header #selected {
@@ -54,8 +62,61 @@
 
         #header #selected a {
             position: relative;
+            height: 50px;
             top: 1px;
             background: white;
             color: black;
             font-weight: bold;
+        }
+
+        .popup {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        .popup .popuptext {
+            visibility: hidden;
+            width: 160px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -80px;
+        }
+        
+        .popup .popuptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+        
+        .popup .show {
+            visibility: visible;
+            -webkit-animation: fadeIn 1s;
+            animation: fadeIn 1s;
+        }
+        
+        @-webkit-keyframes fadeIn {
+            from {opacity: 0;} 
+            to {opacity: 1;}
+        }
+        
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity:1 ;}
         }

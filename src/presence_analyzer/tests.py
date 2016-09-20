@@ -8,11 +8,11 @@ import json
 import datetime
 import time
 import unittest
+from collections import OrderedDict
 
 import main  # pylint: disable=relative-import
 import utils  # pylint: disable=relative-import
 import views  # pylint: disable=unused-import, relative-import
-
 from .utils import memoize
 
 TEST_DATA_CSV = os.path.join(
@@ -71,7 +71,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             }
         )
 
-    def test_presenc_weekday_view(self):
+    def test_presence_weekday_view(self):
         """
         Test mean presence time of given user grouped by weekday.
         """
@@ -92,6 +92,9 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
                 ['Sun', 22969]
             ]
         )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
 
     def test_mean_time_weekday_view(self):
         """
@@ -113,6 +116,9 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
                 ['Sun', 22969.0]
             ]
         )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
 
     def test_presence_start_end(self):
         """
@@ -134,6 +140,9 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
                 ['Sun', 0, 0]
             ]
         )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
 
     def test_podium(self):
         """
@@ -158,6 +167,37 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
                 ['August', 6],
                 ['June', 7],
                 ['September', 32]
+            ]
+        )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
+
+    def test_five_top(self):
+        """
+        Test top 5 workers per months in year.
+        """
+        resp = self.client.get('/api/v1/five_top/9,2013')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'hours': 32,
+                    'user_id': 11,
+                    'name': 'Maciej D.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/11'
+                },
+                {
+                    'hours': 21,
+                    'user_id': 10,
+                    'name': 'Maciej Z.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/10'
+                }
             ]
         )
 
@@ -190,7 +230,7 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
         """
         data = utils.get_data()
         self.assertIsInstance(data, dict)
-        self.assertItemsEqual(data.keys(), [10, 11])
+        self.assertItemsEqual(data.keys(), [10, 11, 68, 49, 176, 141, 26, 62])
         sample_date = datetime.date(2013, 9, 10)
         self.assertIn(sample_date, data[10])
         self.assertItemsEqual(data[10][sample_date].keys(), ['start', 'end'])
@@ -332,6 +372,223 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
                 ['June', 7],
                 ['September', 32]
             ]
+        )
+
+    def test_group_by_month(self):
+        """
+        Test grouping presence entries by month.
+        """
+        data = utils.group_by_month(utils.get_data(), 2013)
+        self.assertEqual(
+            data,
+            [
+                {68: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {
+                    10: [
+                        [], [], [], [], [], [], [], [], [], [78217], [], [], []
+                    ]
+                },
+                {
+                    11: [
+                        [], [], [], [], [6426], [22969], [25321],
+                        [16564], [24123], [118402], [], [], []
+                    ]
+                },
+                {141: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {176: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {49: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {26: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {62: [[], [], [], [], [], [], [], [], [], [], [], [], []]}
+            ]
+        )
+        data = utils.group_by_month(utils.get_data(), 2011)
+        self.assertEqual(
+            data,
+            [
+                {68: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {10: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {11: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {141: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {176: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {49: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {26: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
+                {62: [[], [], [], [], [], [], [], [], [], [], [], [], []]}
+            ]
+        )
+
+    def test_five_top_workers(self):
+        """
+        Test top 5 presence users with information about them.
+        """
+        data = utils.five_top_workers(9, 1997)
+        self.assertEqual(data, [])
+        data = utils.five_top_workers(9, 2013)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'hours': 32, 'user_id': 11, 'name': 'Maciej D.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/11'
+                },
+                {
+                    'hours': 21, 'user_id': 10, 'name': 'Maciej Z.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/10'
+                }
+            ]
+        )
+        data = utils.five_top_workers(9, 2015)
+        self.assertEqual(
+            data,
+            [
+                {
+                    'hours': 15, 'user_id': 62, 'name': 'Damian G.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/62'
+                },
+                {
+                    'hours': 12, 'user_id': 141, 'name': 'Adam P.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/141'
+                },
+                {
+                    'hours': 11, 'user_id': 176, 'name': 'Adrian K.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/176'
+                },
+                {
+                    'hours': 11, 'user_id': 49, 'name': 'Dariusz Ś.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/49'
+                },
+                {
+                    'hours': 8, 'user_id': 68, 'name': 'Damian K.',
+                    'avatar':
+                    'https://intranet.stxnext.pl:443/api/images/users/68'
+                }
+            ]
+        )
+
+    def test_five_top_user_data(self):
+        """
+        Test top 5 user data.
+        """
+        dict_months = [
+            (10, [455386]), (11, [263049]), (12, [371559]),
+            (13, [394007]), (15, [432795]), (16, [513180]),
+            (176, [606888]), (19, [434499]), (165, [555037]),
+            (170, [576346]), (23, [514312]), (24, [235634]),
+            (141, [612478]), (26, [508050]), (26, [560624]),
+            (29, [385973]), (30, []), (31, []), (33, [306667]),
+            (36, [546225]), (48, []), (49, []), (54, []), (58, []),
+        ]
+        sorted_dict = OrderedDict(
+            [
+                (141, [612478]), (176, [606888]), (170, [576346]),
+                (26, [560624]), (165, [555037]), (36, [546225]),
+                (23, [514312]), (16, [513180]), (26, [508050]),
+                (10, [455386]), (19, [434499]), (15, [432795]),
+                (13, [394007]), (29, [385973]), (12, [371559]),
+                (33, [306667]), (11, [263049]), (24, [235634]),
+                (101, [])
+            ]
+        )
+        data = utils.five_top_user_data(dict_months, sorted_dict)
+        self.assertEqual(
+            data[0],
+            {
+                'hours': 170,
+                'user_id': 141,
+                'name': 'Adam P.',
+                'avatar':
+                'https://intranet.stxnext.pl:443/api/images/users/141'
+            }
+        )
+        sorted_dict = OrderedDict([(141, [612478])])
+        data = utils.five_top_user_data(dict_months, sorted_dict)
+        self.assertEqual(data, [])
+
+    def test_sorted_months_dict(self):
+        """
+        Test sorting of months dict.
+        """
+        dict_months = [
+            (10, [455386]), (11, [263049]), (12, [371559]),
+            (13, [394007]), (15, [432795]), (16, [513180]),
+            (176, [606888]), (19, [434499]), (165, [555037]),
+            (170, [576346]), (23, [514312]), (24, [235634]),
+            (141, [612478]), (26, [508050]), (26, [560624]),
+            (29, [385973]), (30, []), (31, []), (33, [306667]),
+            (36, [546225]), (48, []), (49, []), (54, []), (58, [])
+        ]
+        data = utils.sorted_months_dict(dict_months)
+        self.assertEqual(
+            data,
+            OrderedDict(
+                [
+                    (141, [612478]), (176, [606888]), (170, [576346]),
+                    (26, [508050]), (165, [555037]), (36, [546225]),
+                    (23, [514312]), (16, [513180]), (10, [455386]),
+                    (19, [434499]), (15, [432795]), (13, [394007]),
+                    (29, [385973]), (12, [371559]), (33, [306667]),
+                    (11, [263049]), (24, [235634]), (30, []), (31, []),
+                    (48, []), (49, []), (54, []), (58, [])
+                ]
+            )
+        )
+
+    def test_months_sum_dict(self):
+        """
+        Test appending and suming time for every month.
+        """
+        items = {
+            178:
+            {
+                datetime.date(2013, 9, 9):
+                {
+                    'end': datetime.time(17, 14, 42),
+                    'start': datetime.time(11, 43, 50)
+                }
+            },
+            179:
+            {
+                datetime.date(2013, 9, 12):
+                {
+                    'end': datetime.time(18, 5, 24),
+                    'start': datetime.time(16, 55, 24)
+                }
+            }
+        }
+        item = datetime.date(2013, 9, 9)
+        months = [[] for month in xrange(13)]
+        data = utils.months_sum_dict(2013, items, item, 178, months)
+        self.assertEqual(
+            data,
+            [
+                [], [], [], [], [], [], [], [], [], [19852], [], [], []
+            ]
+        )
+
+    def test_user_validate(self):
+        """
+        Test checking if user exist.
+        """
+        months_sum = [
+            [], [], [], [], [], [], [550395], [632015],
+            [505118], [499105], [486939], [624356], [455386]
+        ]
+        data = utils.user_validate(months_sum, 34654)
+        self.assertEqual(data, [])
+        data = utils.user_validate(months_sum, 141)
+        self.assertEqual(
+            data,
+            {
+                141: [
+                    [], [], [], [], [], [], [550395], [632015],
+                    [505118], [499105], [486939], [624356], [455386]
+                ]
+            }
         )
 
 
