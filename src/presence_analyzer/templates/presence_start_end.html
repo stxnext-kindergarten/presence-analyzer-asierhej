@@ -1,6 +1,6 @@
 <%inherit file="base.html"/>
 <%def name="location()">
-    <% return ("startend")%>
+    <% return ('Presence start-end')%>
 </%def>
 <%block name="scripts">
     <script src="/static/js/jquery.min.js"></script>
@@ -16,7 +16,8 @@
     
         (function($) {
             $(document).ready(function(){
-                var loading = $('#loading');
+                var loading = $('#loading'),
+                    no_data = $("#no_data");
                 $.getJSON('${url_for("users_view")}', function(result) {
                     var dropdown = $("#user_id");
                     $.each(result, function(item) {
@@ -35,6 +36,10 @@
                         loading.show();
                         chart_div.hide();
                         $.getJSON("${url_for('presence_start_end', user_id=0)}"+selected_user_int, function(result) {
+                            if (result == 'no data') {
+                                loading.hide();
+                                no_data.show();
+                            }
                             $.each(result, function(index, value) {
                                 value[1] = parseInterval(value[1]);
                                 value[2] = parseInterval(value[2]);

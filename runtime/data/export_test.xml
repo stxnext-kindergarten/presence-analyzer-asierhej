@@ -54,5 +54,13 @@
             <avatar>/api/images/users/151</avatar>
             <name>Dawid J.</name>
         </user>
+        <user id="10">
+            <avatar>/api/images/users/10</avatar>
+            <name>Maciej Z.</name>
+        </user>
+        <user id="11">
+            <avatar>/api/images/users/11</avatar>
+            <name>Maciej D.</name>
+        </user>
     </users>
 </intranet>
