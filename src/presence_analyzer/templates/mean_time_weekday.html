@@ -37,7 +37,7 @@
                         chart_div.hide();
                         var selected_user_int = parseInt(selected_user); 
                         $.getJSON("${url_for('mean_time_weekday_view', user_id=0)}"+selected_user_int, function(result) {
-                            if (result == 'no data') {
+                            if (result == "no data") {
                                 loading.hide();
                                 no_data.show();
                             }

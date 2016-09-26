@@ -167,16 +167,48 @@ def day_start_end(items):
         end = seconds_since_midnight(items[date]['end'])
         weekdays[date.weekday()].append([start, end])
     days = calendar.day_abbr
-    result = []
+    results = []
     for day in days:
         start = []
         end = []
-        for item in weekdays[len(result)]:
+        for item in weekdays[len(results)]:
             if item != []:
                 start.append(item[0])
                 end.append(item[1])
-        result.append([day, mean(start), mean(end)])
-    return result
+        results.append([day, mean(start), mean(end)])
+    return results
+
+
+def podium_data_maker(user):
+    """
+    Groups presence entries as podium data.
+    """
+    months = [[] for month in xrange(12)]
+    for item in user:
+        start = user[item]['start']
+        end = user[item]['end']
+        months[item.month].append(interval(start, end))
+        months[item.month] = [sum(months[item.month])]
+    results = podium_result_structure_builder(months)
+    return sorted(results, key=lambda time: time[1])
+
+
+def podium_result_structure_builder(months):
+    """
+    Building results for podium template.
+    """
+    results = []
+    for item in months:
+        try:
+            results.append(
+                [
+                    calendar.month_name[months.index(item)],
+                    item[0] / 3600
+                ]
+            )
+        except:
+            results.append(['no data', 0])
+    return results
 
 
 def months_sum_dict(year, items, item, user, months):
@@ -214,13 +246,13 @@ def group_by_month(items, year):
     """
     Groups presence entries by month.
     """
-    result = []
+    results = []
     for user in items:
         months = [[] for month in xrange(13)]
         for item in items[user]:
             months_sum = months_sum_dict(year, items, item, user, months)
-        result.append(user_validate(months_sum, user))
-    return result
+        results.append(user_validate(months_sum, user))
+    return results
 
 
 def sorted_months_dict(dict_months):
@@ -242,13 +274,13 @@ def five_top_user_data(dict_months, sorted_dict):
     Collect data and append it to the top 5 user.
     """
     id_top = list(sorted_dict.keys())[:5]
-    result = []
+    results = []
     for item in id_top:
         if dict(dict_months)[item] == 0 or len(id_top) < 5:
-            return result
+            return results
         else:
             try:
-                result.append(
+                results.append(
                     {
                         'user_id': item,
                         'hours': dict(dict_months)[item][0] / 3600,
@@ -257,8 +289,8 @@ def five_top_user_data(dict_months, sorted_dict):
                     }
                 )
             except:
-                return result
-    return result
+                return results
+    return results
 
 
 def five_top_workers(month, year):

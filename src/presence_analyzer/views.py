@@ -11,12 +11,13 @@ from flask_mako import MakoTemplates, render_template
 from presence_analyzer.main import app
 from presence_analyzer.utils import (
     day_start_end,
+    five_top_workers,
     get_data,
     group_by_weekday,
     jsonify,
     mean,
-    xml_translator,
-    five_top_workers
+    podium_data_maker,
+    xml_translator
 )
 
 log = logging.getLogger(__name__)  # pylint: disable=invalid-name
@@ -66,7 +67,7 @@ def months_view():
             years_on.append(year)
     years = sorted(years, key=lambda year: year[1])
     months = []
-    for month in list(enumerate(calendar.month_abbr[1:], start=1)):
+    for month in list(enumerate(calendar.month_abbr[1:])):
         months.append({'number': month[0], 'name': month[1]})
     result = []
     for year in years:
@@ -84,7 +85,7 @@ def mean_time_weekday_view(user_id):
     """
     data = get_data()
     if user_id not in data:
-        return "no data"
+        return 'no data'
 
     weekdays = group_by_weekday(data[user_id])
     result = [
@@ -102,7 +103,7 @@ def presence_weekday_view(user_id):
     """
     data = get_data()
     if user_id not in data:
-        return "no data"
+        return 'no data'
 
     weekdays = group_by_weekday(data[user_id])
     result = [
@@ -122,9 +123,22 @@ def presence_start_end(user_id):
     """
     data = get_data()
     if user_id not in data:
-        return "no data"
+        return 'no data'
 
     return day_start_end(data[user_id])
+
+
+@app.route('/api/v1/podium/<int:user_id>', methods=['GET'])
+@jsonify
+def podium(user_id):
+    """
+    Five best months of work time.
+    """
+    data = get_data()
+    if user_id not in data:
+        return 'no data'
+
+    return podium_data_maker(data[user_id])
 
 
 @app.route('/api/v1/five_top/<month_year>', methods=['GET'])

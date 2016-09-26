@@ -4,7 +4,8 @@
     (url_for("redirect_mako",where = "presence_weekday.html"),"Presence by weekday"),
     (url_for("redirect_mako", where = "mean_time_weekday.html"),"Presence mean time"),
     (url_for("redirect_mako", where = "presence_start_end.html"),"Presence start-end"),
-    (url_for("redirect_mako", where = "top_5.html"),"TOP 5")
+    (url_for("redirect_mako", where = "top_5.html"),"Top 5 users"),
+    (url_for('redirect_mako', where = 'podium.html'),'Top 5 months')
 ] %>
 <html lang=en>
 <head>
@@ -69,6 +70,8 @@
                 <div id="loading">
                     <img src="/static/img/loading.gif" />
                 </div>
+                <div id="chart_div" style="display: none"></div>
+                <div id="container" style="display: none"></div>
             </p>
         </div>
     </div>

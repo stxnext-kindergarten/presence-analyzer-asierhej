@@ -36,7 +36,7 @@
                         loading.show();
                         chart_div.hide();
                         $.getJSON("${url_for('presence_start_end', user_id=0)}"+selected_user_int, function(result) {
-                            if (result == 'no data') {
+                            if (result == "no data") {
                                 loading.hide();
                                 no_data.show();
                             }

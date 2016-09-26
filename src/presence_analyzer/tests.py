@@ -71,7 +71,7 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             }
         )
 
-    def test_presenc_weekday_view(self):
+    def test_presence_weekday_view(self):
         """
         Test mean presence time of given user grouped by weekday.
         """
@@ -84,14 +84,17 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             [
                 ['Weekday', 'Presence (s)'],
                 ['Mon', 24123],
-                ['Tue', 16564],
-                ['Wed', 25321],
+                ['Tue', 41885],
+                ['Wed', 41885],
                 ['Thu', 45968],
-                ['Fri', 6426],
-                ['Sat', 0],
-                ['Sun', 0]
+                ['Fri', 30549],
+                ['Sat', 6426],
+                ['Sun', 22969]
             ]
         )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
 
     def test_mean_time_weekday_view(self):
         """
@@ -105,14 +108,17 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
             data,
             [
                 ['Mon', 24123.0],
-                ['Tue', 16564.0],
-                ['Wed', 25321.0],
+                ['Tue', 20942.5],
+                ['Wed', 20942.5],
                 ['Thu', 22984.0],
-                ['Fri', 6426.0],
-                ['Sat', 0.0],
-                ['Sun', 0.0]
+                ['Fri', 15274.5],
+                ['Sat', 6426.0],
+                ['Sun', 22969.0]
             ]
         )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
 
     def test_presence_start_end(self):
         """
@@ -134,6 +140,38 @@ class PresenceAnalyzerViewsTestCase(unittest.TestCase):
                 ['Sun', 0, 0]
             ]
         )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
+
+    def test_podium(self):
+        """
+        Test five best months of work time.
+        """
+        resp = self.client.get('/api/v1/podium/11')
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.content_type, 'application/json')
+        data = json.loads(resp.data)
+        self.assertEqual(
+            data,
+            [
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['April', 1],
+                ['July', 4],
+                ['May', 6],
+                ['August', 6],
+                ['June', 7],
+                ['September', 32]
+            ]
+        )
+        resp = self.client.get('/api/v1/podium/9999')
+        data = json.loads(resp.data)
+        self.assertEqual(data, 'no data')
 
     def test_five_top(self):
         """
@@ -286,6 +324,56 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
             return data
         self.assertNotEqual(other_calculation(), other_calculation())
 
+    def test_podium_result_structure_builder(self):
+        """
+        Test building result for podium template.
+        """
+        months = [
+            [], [], [], [], [], [], [276890],
+            [655139], [500730], [233576], [], [], []
+        ]
+        data = utils.podium_result_structure_builder(months)
+        self.assertEqual(
+            data,
+            [
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['June', 76],
+                ['July', 181],
+                ['August', 139],
+                ['September', 64],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0]
+            ]
+        )
+
+    def test_podium_data_maker(self):
+        """
+        Test groups presence entries as podium data.
+        """
+        data = utils.podium_data_maker(utils.get_data()[11])
+        self.assertEqual(
+            data,
+            [
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['no data', 0],
+                ['April', 1],
+                ['July', 4],
+                ['May', 6],
+                ['August', 6],
+                ['June', 7],
+                ['September', 32]
+            ]
+        )
+
     def test_group_by_month(self):
         """
         Test grouping presence entries by month.
@@ -302,8 +390,8 @@ class PresenceAnalyzerUtilsTestCase(unittest.TestCase):
                 },
                 {
                     11: [
-                        [], [], [], [], [], [], [],
-                        [], [], [118402], [], [], []
+                        [], [], [], [], [6426], [22969], [25321],
+                        [16564], [24123], [118402], [], [], []
                     ]
                 },
                 {141: [[], [], [], [], [], [], [], [], [], [], [], [], []]},
